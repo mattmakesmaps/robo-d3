@@ -11,12 +11,15 @@ Source: http://waterservices.usgs.gov/rest/IV-Test-Tool.html
 import urllib2, json, pprint, os, dateutil.parser, time, subprocess
 
 if __name__ == '__main__':
-    print "Staring"
-    print os.path.dirname(__file__)
+    print "Starting"
+    print "File: %s" % os.path.dirname(__file__)
 
     url = "http://waterservices.usgs.gov/nwis/iv/?format=json,1.1&sites=12208000,12167000,12161000&period=P2D&parameterCd=00060,00065"
     in_cfs_data = json.loads(urllib2.urlopen(url).read())
-    out_data_path = os.path.join(os.pardir, 'data/gauge_data.js')
+# git --git-dir=/projects/robo-d3/.git --work-tree=/projects/robo-d3 
+    out_data_parent_path = os.path.normpath(os.path.join(os.path.dirname(__file__), os.pardir))
+    out_data_path = os.path.join(out_data_parent_path, 'data/gauge_data.js')
+    print "Out Data Path: %s" % out_data_path 
 
     # Dates are in actual ISO 8601 format.
     # https://github.com/mbostock/d3/wiki/Time-Formatting#wiki-format_iso
@@ -34,13 +37,21 @@ if __name__ == '__main__':
          {'key':"Nooksack River", 'values': nooksack_deming}]
     )
 
-    with open(os.path.join(out_data_path), 'w') as out_file:
+    with open(out_data_path, 'w') as out_file:
         out_file.write(formatted_gauge_data)
 
-    pprint.pprint(formatted_gauge_data)
+#    pprint.pprint(formatted_gauge_data)
 
 # Use suprocess module to push revised data to github.
-subprocess.call(['git', 'add', out_data_path])
-subprocess.call(['git', 'commit', '-m', '"Data Upload: ' + time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()) + '"'])
-subprocess.call(['git', 'push'])
+# Need to set both the --git-dir and --work-tree
+# http://stackoverflow.com/questions/1386291/git-git-dir-not-working-as-expected
+subprocess.call(['git','--git-dir', out_data_parent_path + '/.git',
+                 '--work-tree', out_data_parent_path,
+                 'add', out_data_path])
+subprocess.call(['git', '--git-dir', out_data_parent_path + '/.git',
+                 '--work-tree', out_data_parent_path,
+                 'commit', '-m', '"Data Upload: ' + time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()) + '"'])
+subprocess.call(['git', '--git-dir', out_data_parent_path + '/.git',
+                 '--work-tree', out_data_parent_path,
+                 'push'])
 
