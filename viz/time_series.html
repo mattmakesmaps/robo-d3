@@ -11,17 +11,31 @@
     var h = 500;
     var padding = w * 0.10 //padding is 10% the width.
 
+    var dataset = []
     var svg = d3.select("body")
             .append("svg")
             .attr({
                 "width": w,
                 "height": h
             });
+    
+    var cfs_array = [];
+    var time_array = [];
+
+    function makeGaugeDataArray(index, element){
+    	cfs_array.push(element.cfs);
+    	time_array.push(element.time);
+    };
+    // Create a mapping, which allows you to use d3.forEach method.
+    d3.map(gauge_data[0]['values']).forEach(makeGaugeDataArray)
 
     var xScale = d3.time.scale()
-            .domain([0, (dataset.length - 1)])
+            .domain([d3.min(time_array), d3.max(time_array)])
             .range([padding, w - padding])
 
+    var yScale = d3.scale.linear()
+            .domain([d3.min(cfs_array), d3.max(cfs_array)])
+            .range([padding, h - padding])
 
     function makeAxisLabels(inElement, inText, inAnchor, inX, inY) {
         inElement.append("text")
@@ -34,10 +48,6 @@
                 .attr("fill", "#000000");
     }
 
-    makeAxisLabels(svg, "Least Flavor Clarity", "start", 50, 435);
-    makeAxisLabels(svg, "Most Body", "start", 50, 455);
-    makeAxisLabels(svg, "Most Flavor Clarity", "end", w - 50, 435);
-    makeAxisLabels(svg, "Least Body", "end", w - 50, 455);
 </script>
 </body>
 </html>
