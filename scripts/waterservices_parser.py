@@ -18,7 +18,7 @@ if __name__ == '__main__':
     in_cfs_data = json.loads(urllib2.urlopen(url).read())
 # git --git-dir=/projects/robo-d3/.git --work-tree=/projects/robo-d3 
     out_data_parent_path = os.path.normpath(os.path.join(os.path.dirname(__file__), os.pardir))
-    out_data_path = os.path.join(out_data_parent_path, 'data/gauge_data.js')
+    out_data_path = os.path.join(out_data_parent_path, 'data/gauge_data.json')
     print "Out Data Path: %s" % out_data_path 
 
     # Dates are in actual ISO 8601 format.
@@ -37,8 +37,9 @@ if __name__ == '__main__':
          {'key':"Nooksack River", 'values': nooksack_deming}]
     )
 
-    with open(out_data_path, 'w') as out_file:
-        out_file.write(formatted_gauge_data)
+    with open(out_data_path, 'wb') as out_file:
+        out_file.write('var download_time = "%s"\n' % time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()))
+        out_file.write('var gauge_data = %s' % pprint.pprint(formatted_gauge_data))
 
 #    pprint.pprint(formatted_gauge_data)
 
