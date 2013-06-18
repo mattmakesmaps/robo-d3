@@ -6,8 +6,8 @@ __date__ = '6/16/13'
 """
 PARSE SOME Freaking Hydro DATA
 Source: http://waterservices.usgs.gov/rest/IV-Test-Tool.html
-
 """
+
 import urllib2, json, pprint, os, dateutil.parser, time, subprocess
 
 if __name__ == '__main__':
@@ -27,9 +27,9 @@ if __name__ == '__main__':
     # Given a string representing ISO Time, convert to a datetime.datetime object, then to a time tuple,
     # then use time.mktime() to covert to epoch time.
 
-    stilly_granite_falls = [[int(time.mktime(dateutil.parser.parse(i['dateTime']).timetuple()))*1000, float(i['value'])] for i in in_cfs_data['value']['timeSeries'][0]['values'][0]['value']]
-    stilly_arlington = [[int(time.mktime(dateutil.parser.parse(i['dateTime']).timetuple()))*1000, float(i['value'])] for i in in_cfs_data['value']['timeSeries'][2]['values'][0]['value']]
-    nooksack_deming = [[int(time.mktime(dateutil.parser.parse(i['dateTime']).timetuple()))*1000, float(i['value'])] for i in in_cfs_data['value']['timeSeries'][4]['values'][0]['value']]
+    stilly_granite_falls = [{'time': int(time.mktime(dateutil.parser.parse(i['dateTime']).timetuple()))*1000, 'cfs': float(i['value'])} for i in in_cfs_data['value']['timeSeries'][0]['values'][0]['value']]
+    stilly_arlington = [{'time': int(time.mktime(dateutil.parser.parse(i['dateTime']).timetuple()))*1000, 'cfs': float(i['value'])} for i in in_cfs_data['value']['timeSeries'][2]['values'][0]['value']]
+    nooksack_deming = [{'time': int(time.mktime(dateutil.parser.parse(i['dateTime']).timetuple()))*1000, 'cfs': float(i['value'])} for i in in_cfs_data['value']['timeSeries'][4]['values'][0]['value']]
 
     formatted_gauge_data = json.dumps(
         [{'key':"Stillaguamish At Granite Falls", 'values': stilly_granite_falls},
@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
     with open(out_data_path, 'wb') as out_file:
         out_file.write('var download_time = "%s"\n' % time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()))
-        out_file.write('var gauge_data = %s' % pprint.pprint(formatted_gauge_data))
+        out_file.write('var gauge_data = %s' % formatted_gauge_data)
 
 #    pprint.pprint(formatted_gauge_data)
 
