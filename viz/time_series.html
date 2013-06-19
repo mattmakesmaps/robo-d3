@@ -52,11 +52,11 @@
     }
 
     var xScale = d3.time.scale()
-            .domain([d3.min(time_array), d3.max(time_array)])
+            .domain([d3.max(time_array), d3.max(time_array)])
             .range([padding, w - padding])
 
     var yScale = d3.scale.linear()
-            .domain([d3.min(cfs_array), d3.max(cfs_array)])
+            .domain([0, d3.max(cfs_array)+2])
             .range([h - padding, padding])
             
     var xAxis = d3.svg.axis()
