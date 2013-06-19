@@ -18,7 +18,7 @@ if __name__ == '__main__':
     in_cfs_data = json.loads(urllib2.urlopen(url).read())
 # git --git-dir=/projects/robo-d3/.git --work-tree=/projects/robo-d3 
     out_data_parent_path = os.path.normpath(os.path.join(os.path.dirname(__file__), os.pardir))
-    out_data_path = os.path.join(out_data_parent_path, 'data/gauge_data.json')
+    out_data_path = os.path.join(out_data_parent_path, 'data/gauge_data.js')
     print "Out Data Path: %s" % out_data_path 
 
     # Dates are in actual ISO 8601 format.

@@ -1,11 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
-    <script type="text/javascript" src="https://raw.github.com/mattmakesmaps/robo-d3/master/data/gauge_data.json"></script>
-</head>
-<body>
+		<meta charset="utf-8"/>
+		<script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+		<!-- Note http://rawgithub.com/ -->
+		<script type="text/javascript" src="https://rawgithub.com/mattmakesmaps/robo-d3/master/data/gauge_data.json"></script>
+		<style>
+			.axis path, .axis line {
+				fill: none;
+				stroke: black;
+				shape-rendering: crispEdges;
+			}
+
+			.axis text {
+				font-family: sans-serif;
+				font-size: 11px;
+			}
+			
+			 .visline {
+			 	fill: none;
+			 	stroke-width: 2;
+  shape-rendering: crispEdges;
+}
+		</style>
+	</head>
+	<body>
 <script type="text/javascript">
     var w = 960;
     var h = 500;
@@ -26,8 +45,11 @@
     	cfs_array.push(element.cfs);
     	time_array.push(element.time);
     };
-    // Create a mapping, which allows you to use d3.forEach method.
-    d3.map(gauge_data[0]['values']).forEach(makeGaugeDataArray)
+    
+    for (var i = 0; i < gauge_data.length; i++){
+    	// Create a mapping, which allows you to use d3.forEach method.
+    d3.map(gauge_data[i]['values']).forEach(makeGaugeDataArray)
+    }
 
     var xScale = d3.time.scale()
             .domain([d3.min(time_array), d3.max(time_array)])
@@ -36,6 +58,42 @@
     var yScale = d3.scale.linear()
             .domain([d3.min(cfs_array), d3.max(cfs_array)])
             .range([padding, h - padding])
+            
+    var xAxis = d3.svg.axis()
+                    .scale(xScale)
+                    .ticks(8)
+                    .orient("bottom")
+    
+    var yAxis = d3.svg.axis()
+                    .scale(yScale)
+                    .ticks(8)
+                    .orient("left")
+    
+    var line = d3.svg.line()
+        .x(function(d){return xScale(d.time);})
+        .y(function(d){return yScale(d.cfs);});
+    
+    svg.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(0," + (h - padding) + ")")
+        .call(xAxis);
+
+    svg.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(" + padding + ",0)")
+        .call(yAxis);
+        
+    var color = d3.scale.category10();
+        
+    var group = svg.selectAll('.visline')
+       .data(gauge_data)
+       .enter().append('path')
+			 .attr("class", "visline")
+			 .attr("stroke", function(d, i) {
+                 return color(i);
+             })
+             .attr("fill", "none")
+			 .attr("d", function(d) {return line(d.values);});
 
     function makeAxisLabels(inElement, inText, inAnchor, inX, inY) {
         inElement.append("text")
