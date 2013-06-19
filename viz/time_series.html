@@ -1,118 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-		<meta charset="utf-8"/>
-		<script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
-		<!-- Note http://rawgithub.com/ -->
-		<script type="text/javascript" src="https://rawgithub.com/mattmakesmaps/robo-d3/master/data/gauge_data.js"></script>
-		<style>
-			.axis path, .axis line {
-				fill: none;
-				stroke: black;
-				shape-rendering: crispEdges;
-			}
+    <head>
+        <meta charset="utf-8"/>
+        <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+        <!-- Note http://rawgithub.com/ -->
+        <script type="text/javascript" src="https://rawgithub.com/mattmakesmaps/robo-d3/master/data/gauge_data.js"></script>
+        <style>
+            .axis path, .axis line {
+                fill: none;
+                stroke: black;
+                shape-rendering: crispEdges;
+            }
 
-			.axis text {
-				font-family: sans-serif;
-				font-size: 11px;
-			}
-			
-			 .visline {
-			 	fill: none;
-			 	stroke-width: 2;
-  shape-rendering: crispEdges;
-}
-		</style>
-	</head>
-	<body>
-<script type="text/javascript">
-    var w = 960;
-    var h = 500;
-    var padding = w * 0.10 //padding is 10% the width.
+            .axis text {
+                font-family: sans-serif;
+                font-size: 11px;
+            }
 
-    var dataset = []
-    var svg = d3.select("body")
-            .append("svg")
-            .attr({
-                "width": w,
-                "height": h
+            .legend text {
+                font-family: sans-serif;
+                font-size: 11px;
+            }
+
+            .visline {
+                fill: none;
+                stroke-width: 2;
+                shape-rendering: crispEdges;
+            }
+        </style>
+    </head>
+    <body>
+        <script type="text/javascript">
+            var w = 960;
+            var h = 500;
+            var padding = w * 0.10//padding is 10% the width.
+
+            var svg = d3.select("body").append("svg").attr({
+                "width" : w,
+                "height" : h
             });
-    
-    var cfs_array = [];
-    var time_array = [];
 
-    function makeGaugeDataArray(index, element){
-    	cfs_array.push(element.cfs);
-    	time_array.push(element.time);
-    };
-    
-    for (var i = 0; i < gauge_data.length; i++){
-    	// Create a mapping, which allows you to use d3.forEach method.
-    d3.map(gauge_data[i]['values']).forEach(makeGaugeDataArray)
-    }
+            var cfs_array = [];
+            var time_array = [];
 
-    var xScale = d3.time.scale()
-            .domain([d3.max(time_array), d3.max(time_array)])
-            .range([padding, w - padding])
+            function makeGaugeDataArray(index, element) {
+                cfs_array.push(element.cfs);
+                time_array.push(element.time);
+            };
 
-    var yScale = d3.scale.linear()
-            .domain([0, d3.max(cfs_array)+2])
-            .range([h - padding, padding])
+            for (var i = 0; i < gauge_data.length; i++) {
+                // Create a mapping, which allows you to use d3.forEach method.
+                d3.map(gauge_data[i]['values']).forEach(makeGaugeDataArray)
+            }
+
+            var xScale = d3.time.scale()
+                             .domain([d3.min(time_array), d3.max(time_array)])
+                             .range([padding, w - padding])
+
+            var yScale = d3.scale.linear()
+                             .domain([d3.min(cfs_array) - 1, d3.max(cfs_array) + 1])
+                             .range([h - padding, padding])
+
+            var xAxis = d3.svg.axis()
+                            .scale(xScale)
+                            .ticks(8)
+                            .orient("bottom")
+
+            var yAxis = d3.svg.axis()
+                            .scale(yScale)
+                            .ticks(8)
+                            .orient("left")
+
+            var line = d3.svg.line()
+                            .x(function(d) { return xScale(d.time); })
+                            .y(function(d) { return yScale(d.cfs); });
+
+            svg.append("g")
+                .attr("class", "axis")
+                .attr("transform", "translate(0," + (h - padding) + ")")
+                .call(xAxis);
+
+            svg.append("g")
+                .attr("class", "axis")
+                .attr("transform", "translate(" + padding + ",0)")
+                .call(yAxis)
+                .append("text")
+                    .attr("transform", "rotate(-90)")
+                    .attr("x", (h / 2) * -1)
+                    .attr("y", -40)
+                    .attr("dy", ".71em")
+                    .style("text-anchor", "middle")
+                    .text("Flow CFS");
+
+            var color = d3.scale.category10();
+
+            var group = svg.selectAll('.visline')
+                            .data(gauge_data)
+                            .enter()
+                            .append('path')
+                            .attr("class", "visline")
+                            .attr("stroke", function(d, i) { return color(i); })
+                            .attr("fill", "none").attr("d", function(d) { return line(d.values); });
+                            
+                            
+                          
+              // Legend Example from http://bl.ocks.org/mbostock/3887118
+              var legend = svg.selectAll(".legend")
+                  .data(color.domain())
+                .enter().append("g")
+                  .attr("class", "legend")
+                  .attr("transform", function(d, i) { return "translate(0,"  + (i * 20 + padding) + ")"; });
             
-    var xAxis = d3.svg.axis()
-                    .scale(xScale)
-                    .ticks(8)
-                    .orient("bottom")
-    
-    var yAxis = d3.svg.axis()
-                    .scale(yScale)
-                    .ticks(8)
-                    .orient("left")
-    
-    var line = d3.svg.line()
-        .x(function(d){return xScale(d.time);})
-        .y(function(d){return yScale(d.cfs);});
-    
-    svg.append("g")
-        .attr("class", "axis")
-        .attr("transform", "translate(0," + (h - padding) + ")")
-        .call(xAxis);
+              legend.append("rect")
+                  .attr("x", w - 12 - padding)
+                  .attr("width", 12)
+                  .attr("height", 12)
+                  .style("fill", color);
+              
+              legend.append("text")
+                  .attr("x", w - 18 - padding)
+                  .attr("y", 6)
+                  .attr("dy", ".35em")
+                  .style("text-anchor", "end")
+                  // Given a color's domain [0,1,2], use that as an index to
+                  // grab the corresponding station name from gauge_data
+                  .text(function(d) { return gauge_data[d]['key']; });
 
-    svg.append("g")
-        .attr("class", "axis")
-        .attr("transform", "translate(" + padding + ",0)")
-        .call(yAxis)
-        .append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("x", (h/2)*-1)
-        .attr("y", -40)
-        .attr("dy", ".71em")
-        .style("text-anchor", "middle")
-        .text("Flow CFS");
-        
-    var color = d3.scale.category10();
-        
-    var group = svg.selectAll('.visline')
-       .data(gauge_data)
-       .enter().append('path')
-			 .attr("class", "visline")
-			 .attr("stroke", function(d, i) {
-                 return color(i);
-             })
-             .attr("fill", "none")
-			 .attr("d", function(d) {return line(d.values);});
-
-    function makeAxisLabels(inElement, inText, inAnchor, inX, inY, inColor) {
-        inElement.append("text")
-                .text(inText)
-                .attr("x", inX)
-                .attr("y", inY)
-                .attr("text-anchor", inAnchor)
-                .attr("font-family", "sans-serif")
-                .attr("font-size", "16px")
-                .attr("fill", inColor);
-    }
-
-</script>
-</body>
+        </script>
+    </body>
 </html>
