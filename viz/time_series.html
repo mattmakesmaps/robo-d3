@@ -4,7 +4,7 @@
 		<meta charset="utf-8"/>
 		<script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
 		<!-- Note http://rawgithub.com/ -->
-		<script type="text/javascript" src="https://rawgithub.com/mattmakesmaps/robo-d3/master/data/gauge_data.json"></script>
+		<script type="text/javascript" src="https://rawgithub.com/mattmakesmaps/robo-d3/master/data/gauge_data.js"></script>
 		<style>
 			.axis path, .axis line {
 				fill: none;
@@ -57,7 +57,7 @@
 
     var yScale = d3.scale.linear()
             .domain([d3.min(cfs_array), d3.max(cfs_array)])
-            .range([padding, h - padding])
+            .range([h - padding, padding])
             
     var xAxis = d3.svg.axis()
                     .scale(xScale)
@@ -81,7 +81,14 @@
     svg.append("g")
         .attr("class", "axis")
         .attr("transform", "translate(" + padding + ",0)")
-        .call(yAxis);
+        .call(yAxis)
+        .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", (h/2)*-1)
+        .attr("y", -40)
+        .attr("dy", ".71em")
+        .style("text-anchor", "middle")
+        .text("Flow CFS");
         
     var color = d3.scale.category10();
         
@@ -95,7 +102,7 @@
              .attr("fill", "none")
 			 .attr("d", function(d) {return line(d.values);});
 
-    function makeAxisLabels(inElement, inText, inAnchor, inX, inY) {
+    function makeAxisLabels(inElement, inText, inAnchor, inX, inY, inColor) {
         inElement.append("text")
                 .text(inText)
                 .attr("x", inX)
@@ -103,7 +110,7 @@
                 .attr("text-anchor", inAnchor)
                 .attr("font-family", "sans-serif")
                 .attr("font-size", "16px")
-                .attr("fill", "#000000");
+                .attr("fill", inColor);
     }
 
 </script>
